@@ -3,29 +3,47 @@
     <header class="top-nav">
       <div class="nav-container">
         <div class="logo">
-          <h1>{{ t('nav.companyName') }}</h1>
-          <span class="subtitle">{{ t('nav.subtitle') }}</span>
+          <h1>{{ t("nav.companyName") }}</h1>
+          <span class="subtitle">{{ t("nav.subtitle") }}</span>
         </div>
         <nav class="nav-tabs">
           <router-link to="/" :class="{ active: $route.path === '/' }">
-            {{ t('nav.overview') }}
+            {{ t("nav.overview") }}
           </router-link>
-          <router-link to="/inventory" :class="{ active: $route.path === '/inventory' }">
-            {{ t('nav.inventory') }}
+          <router-link
+            to="/inventory"
+            :class="{ active: $route.path === '/inventory' }"
+          >
+            {{ t("nav.inventory") }}
           </router-link>
-          <router-link to="/orders" :class="{ active: $route.path === '/orders' }">
-            {{ t('nav.orders') }}
+          <router-link
+            to="/orders"
+            :class="{ active: $route.path === '/orders' }"
+          >
+            {{ t("nav.orders") }}
           </router-link>
-          <router-link to="/spending" :class="{ active: $route.path === '/spending' }">
-            {{ t('nav.finance') }}
+          <router-link
+            to="/spending"
+            :class="{ active: $route.path === '/spending' }"
+          >
+            {{ t("nav.finance") }}
           </router-link>
-          <router-link to="/demand" :class="{ active: $route.path === '/demand' }">
-            {{ t('nav.demandForecast') }}
+          <router-link
+            to="/demand"
+            :class="{ active: $route.path === '/demand' }"
+          >
+            {{ t("nav.demandForecast") }}
           </router-link>
-          <router-link to="/restocking" :class="{ active: $route.path === '/restocking' }">
-            {{ t('nav.restocking') }}
+          <router-link
+            to="/restocking"
+            :class="{ active: $route.path === '/restocking' }"
+          >
+            {{ t("nav.restocking") }}
           </router-link>
-          <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
+          <router-link
+            to="/reports"
+            :class="{ active: $route.path === '/reports' }"
+          >
             Reports
           </router-link>
         </nav>
@@ -58,98 +76,101 @@
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
-import { api } from './api'
-import { useAuth } from './composables/useAuth'
-import { useI18n } from './composables/useI18n'
-import FilterBar from './components/FilterBar.vue'
-import ProfileMenu from './components/ProfileMenu.vue'
-import ProfileDetailsModal from './components/ProfileDetailsModal.vue'
-import TasksModal from './components/TasksModal.vue'
-import LanguageSwitcher from './components/LanguageSwitcher.vue'
+import { ref, onMounted, computed } from "vue";
+import { api } from "./api";
+import { useAuth } from "./composables/useAuth";
+import { useI18n } from "./composables/useI18n";
+import FilterBar from "./components/FilterBar.vue";
+import ProfileMenu from "./components/ProfileMenu.vue";
+import ProfileDetailsModal from "./components/ProfileDetailsModal.vue";
+import TasksModal from "./components/TasksModal.vue";
+import LanguageSwitcher from "./components/LanguageSwitcher.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     FilterBar,
     ProfileMenu,
     ProfileDetailsModal,
     TasksModal,
-    LanguageSwitcher
+    LanguageSwitcher,
   },
   setup() {
-    const { currentUser } = useAuth()
-    const { t } = useI18n()
-    const showProfileDetails = ref(false)
-    const showTasks = ref(false)
-    const apiTasks = ref([])
+    const { currentUser } = useAuth();
+    const { t } = useI18n();
+    const showProfileDetails = ref(false);
+    const showTasks = ref(false);
+    const apiTasks = ref([]);
 
     // Merge mock tasks from currentUser with API tasks
     const tasks = computed(() => {
-      return [...currentUser.value.tasks, ...apiTasks.value]
-    })
+      return [...currentUser.value.tasks, ...apiTasks.value];
+    });
 
     const loadTasks = async () => {
       try {
-        apiTasks.value = await api.getTasks()
+        apiTasks.value = await api.getTasks();
       } catch (err) {
-        console.error('Failed to load tasks:', err)
+        console.error("Failed to load tasks:", err);
       }
-    }
+    };
 
     const addTask = async (taskData) => {
       try {
-        const newTask = await api.createTask(taskData)
+        const newTask = await api.createTask(taskData);
         // Add new task to the beginning of the array
-        apiTasks.value.unshift(newTask)
+        apiTasks.value.unshift(newTask);
       } catch (err) {
-        console.error('Failed to add task:', err)
+        console.error("Failed to add task:", err);
       }
-    }
+    };
 
     const deleteTask = async (taskId) => {
       try {
         // Check if it's a mock task (from currentUser)
-        const isMockTask = currentUser.value.tasks.some(t => t.id === taskId)
+        const isMockTask = currentUser.value.tasks.some((t) => t.id === taskId);
 
         if (isMockTask) {
           // Remove from mock tasks
-          const index = currentUser.value.tasks.findIndex(t => t.id === taskId)
+          const index = currentUser.value.tasks.findIndex(
+            (t) => t.id === taskId,
+          );
           if (index !== -1) {
-            currentUser.value.tasks.splice(index, 1)
+            currentUser.value.tasks.splice(index, 1);
           }
         } else {
           // Remove from API tasks
-          await api.deleteTask(taskId)
-          apiTasks.value = apiTasks.value.filter(t => t.id !== taskId)
+          await api.deleteTask(taskId);
+          apiTasks.value = apiTasks.value.filter((t) => t.id !== taskId);
         }
       } catch (err) {
-        console.error('Failed to delete task:', err)
+        console.error("Failed to delete task:", err);
       }
-    }
+    };
 
     const toggleTask = async (taskId) => {
       try {
         // Check if it's a mock task (from currentUser)
-        const mockTask = currentUser.value.tasks.find(t => t.id === taskId)
+        const mockTask = currentUser.value.tasks.find((t) => t.id === taskId);
 
         if (mockTask) {
           // Toggle mock task status
-          mockTask.status = mockTask.status === 'pending' ? 'completed' : 'pending'
+          mockTask.status =
+            mockTask.status === "pending" ? "completed" : "pending";
         } else {
           // Toggle API task
-          const updatedTask = await api.toggleTask(taskId)
-          const index = apiTasks.value.findIndex(t => t.id === taskId)
+          const updatedTask = await api.toggleTask(taskId);
+          const index = apiTasks.value.findIndex((t) => t.id === taskId);
           if (index !== -1) {
-            apiTasks.value[index] = updatedTask
+            apiTasks.value[index] = updatedTask;
           }
         }
       } catch (err) {
-        console.error('Failed to toggle task:', err)
+        console.error("Failed to toggle task:", err);
       }
-    }
+    };
 
-    onMounted(loadTasks)
+    onMounted(loadTasks);
 
     return {
       t,
@@ -158,13 +179,99 @@ export default {
       tasks,
       addTask,
       deleteTask,
-      toggleTask
-    }
-  }
-}
+      toggleTask,
+    };
+  },
+};
 </script>
 
 <style>
+:root {
+  color-scheme: light dark;
+
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748b;
+  --color-text-faint: #94a3b8;
+
+  --color-bg-page: #f8fafc;
+  --color-bg-surface: #ffffff;
+  --color-bg-subtle: #f1f5f9;
+
+  --color-border-default: #e2e8f0;
+  --color-border-subtle: #f1f5f9;
+
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+  --color-accent-subtle-bg: #eff6ff;
+
+  --color-success: #10b981;
+  --color-success-bg: #d1fae5;
+  --color-success-text: #065f46;
+
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fed7aa;
+  --color-warning-text: #92400e;
+  --color-warning-subtle-bg: #fffbeb;
+
+  --color-danger: #ef4444;
+  --color-danger-bg: #fecaca;
+  --color-danger-text: #991b1b;
+  --color-danger-subtle-bg: #fef2f2;
+
+  --color-info: #3b82f6;
+  --color-info-bg: #dbeafe;
+  --color-info-text: #1e40af;
+  --color-purple: #8b5cf6;
+  --color-purple-bg: #f5f3ff;
+
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text-primary: #f1f5f9;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+    --color-text-faint: #64748b;
+
+    --color-bg-page: #0f172a;
+    --color-bg-surface: #1e293b;
+    --color-bg-subtle: #1e293b;
+
+    --color-border-default: #334155;
+    --color-border-subtle: #1e293b;
+
+    --color-accent: #60a5fa;
+    --color-accent-hover: #3b82f6;
+    --color-accent-subtle-bg: #1e3a5f;
+
+    --color-success: #34d399;
+    --color-success-bg: #064e3b;
+    --color-success-text: #6ee7b7;
+
+    --color-warning: #fbbf24;
+    --color-warning-bg: #78350f;
+    --color-warning-text: #fcd34d;
+    --color-warning-subtle-bg: #451a03;
+
+    --color-danger: #f87171;
+    --color-danger-bg: #7f1d1d;
+    --color-danger-text: #fca5a5;
+    --color-danger-subtle-bg: #450a0a;
+
+    --color-info: #60a5fa;
+    --color-info-bg: #1e3a8a;
+    --color-info-text: #bfdbfe;
+    --color-purple: #a78bfa;
+    --color-purple-bg: #4c1d95;
+
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -172,9 +279,18 @@ export default {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: #f8fafc;
-  color: #1e293b;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    sans-serif;
+  background: var(--color-bg-page);
+  color: var(--color-text-secondary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -186,9 +302,9 @@ body {
 }
 
 .top-nav {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border-default);
+  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -221,16 +337,16 @@ body {
 .logo h1 {
   font-size: 1.375rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-primary);
   letter-spacing: -0.025em;
 }
 
 .subtitle {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--color-text-muted);
   font-weight: 400;
   padding-left: 0.75rem;
-  border-left: 1px solid #e2e8f0;
+  border-left: 1px solid var(--color-border-default);
 }
 
 .nav-tabs {
@@ -240,7 +356,7 @@ body {
 
 .nav-tabs a {
   padding: 0.625rem 1.25rem;
-  color: #64748b;
+  color: var(--color-text-muted);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.938rem;
@@ -250,23 +366,23 @@ body {
 }
 
 .nav-tabs a:hover {
-  color: #0f172a;
-  background: #f1f5f9;
+  color: var(--color-text-primary);
+  background: var(--color-bg-subtle);
 }
 
 .nav-tabs a.active {
-  color: #2563eb;
-  background: #eff6ff;
+  color: var(--color-accent-hover);
+  background: var(--color-accent-subtle-bg);
 }
 
 .nav-tabs a.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -1px;
   left: 0;
   right: 0;
   height: 2px;
-  background: #2563eb;
+  background: var(--color-accent-hover);
 }
 
 .main-content {
@@ -284,13 +400,13 @@ body {
 .page-header h2 {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-primary);
   margin-bottom: 0.375rem;
   letter-spacing: -0.025em;
 }
 
 .page-header p {
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: 0.938rem;
 }
 
@@ -302,20 +418,20 @@ body {
 }
 
 .stat-card {
-  background: white;
+  background: var(--color-bg-surface);
   padding: 1.25rem;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-default);
   transition: all 0.2s ease;
 }
 
 .stat-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: var(--color-border-default);
+  box-shadow: var(--shadow-md);
 }
 
 .stat-label {
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -326,31 +442,31 @@ body {
 .stat-value {
   font-size: 2.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-primary);
   letter-spacing: -0.025em;
 }
 
 .stat-card.warning .stat-value {
-  color: #ea580c;
+  color: var(--color-warning);
 }
 
 .stat-card.success .stat-value {
-  color: #059669;
+  color: var(--color-success);
 }
 
 .stat-card.danger .stat-value {
-  color: #dc2626;
+  color: var(--color-danger);
 }
 
 .stat-card.info .stat-value {
-  color: #2563eb;
+  color: var(--color-accent-hover);
 }
 
 .card {
-  background: white;
+  background: var(--color-bg-surface);
   border-radius: 10px;
   padding: 1.25rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-default);
   margin-bottom: 1.25rem;
 }
 
@@ -360,13 +476,13 @@ body {
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.875rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .card-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-primary);
   letter-spacing: -0.025em;
 }
 
@@ -380,16 +496,16 @@ table {
 }
 
 thead {
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--color-bg-page);
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 th {
   text-align: left;
   padding: 0.5rem 0.75rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-text-muted);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -397,8 +513,8 @@ th {
 
 td {
   padding: 0.5rem 0.75rem;
-  border-top: 1px solid #f1f5f9;
-  color: #334155;
+  border-top: 1px solid var(--color-bg-subtle);
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
 }
 
@@ -407,7 +523,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f8fafc;
+  background: var(--color-bg-page);
 }
 
 .badge {
@@ -421,66 +537,66 @@ tbody tr:hover {
 }
 
 .badge.success {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
 }
 
 .badge.warning {
-  background: #fed7aa;
-  color: #92400e;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
 }
 
 .badge.danger {
-  background: #fecaca;
-  color: #991b1b;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
 }
 
 .badge.info {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
 }
 
 .badge.increasing {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
 }
 
 .badge.decreasing {
-  background: #fecaca;
-  color: #991b1b;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
 }
 
 .badge.stable {
-  background: #e0e7ff;
-  color: #3730a3;
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
 }
 
 .badge.high {
-  background: #fecaca;
-  color: #991b1b;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
 }
 
 .badge.medium {
-  background: #fed7aa;
-  color: #92400e;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
 }
 
 .badge.low {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
 }
 
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: 0.938rem;
 }
 
 .error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
+  background: var(--color-danger-subtle-bg);
+  border: 1px solid var(--color-danger-bg);
+  color: var(--color-danger-text);
   padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;
